@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <title>Înregistrare - TeniSync</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script>
+    (function () {
+      emailjs.init("wyd9KeK2M6u72rixn");
+    })();
+  </script>
+</head>
+<body class="auth-body-register">
+  <div class="auth-container register-container">
+    <h1>TeniSync</h1>
+    <form id="registerForm">
+      <label>Email: <input type="email" id="email" required></label>
+      <label>Utilizator: <input type="text" id="username" required></label>
+      <label>Parolă: <input type="password" id="password" required></label>
+
+      <label>Level: 
+        <select id="level">
+          <option value="Amator">Amator</option>
+          <option value="Intermediar">Intermediar</option>
+          <option value="Expert">Expert</option>
+        </select>
+      </label>
+
+      <label>Gen:
+        <select id="gender">
+          <option value="Masculin">Masculin</option>
+          <option value="Feminin">Feminin</option>
+        </select>
+      </label>
+
+      <label>Localitate: <input type="text" id="location" required></label>
+      <label>Vârstă: <input type="number" id="age" required></label>
+
+      <button type="submit">Înregistrează-te</button>
+    </form>
+
+    <p>Ai deja cont? <a href="login.html">Autentifică-te aici</a>.</p>
+  </div>
+
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value;
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const level = document.getElementById('level').value;
+      const gender = document.getElementById('gender').value;
+      const location = document.getElementById('location').value;
+      const age = parseInt(document.getElementById('age').value);
+
+      try {
+        const response = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, username, password, level, gender, location, age })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          emailjs.send("gmail_service2", "template_rwgwdu9", {
+            username: username,
+            email: email,
+            name: "TeniSync Bot",
+            message: "Contul tău a fost creat cu succes! Bine ai venit în TeniSync 🎾"
+          }).then(() => {
+            alert("Înregistrare reușită! Verifică emailul 📩");
+            window.location.href = '/login.html';
+          }).catch(() => {
+            alert("Contul a fost creat, dar nu s-a trimis emailul de confirmare.");
+            window.location.href = '/login.html';
+          });
+        } else {
+          alert(result.message || 'Eroare la înregistrare');
+        }
+
+      } catch (err) {
+        alert("A apărut o eroare. Încearcă din nou.");
+      }
+    });
+  </script>
+</body>
+</html>

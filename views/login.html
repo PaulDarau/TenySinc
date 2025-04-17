@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - TeniSync</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-body">
+  <div class="auth-container">
+    <h1>Bine ai venit în TeniSync!</h1>
+    <form id="loginForm" class="auth-form">
+      <label for="username">Utilizator sau Email:</label>
+      <input type="text" id="username" name="username" required>
+
+      <label for="password">Parolă:</label>
+      <input type="password" id="password" name="password" required>
+
+      <button type="submit">Autentificare</button>
+
+      <p class="redirect-text">Nu ai cont? <a href="register.html">Înregistrează-te</a></p>
+      <p id="message" class="message-text"></p>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const message = document.getElementById('message');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const username = form.username.value;
+      const password = form.password.value;
+
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username, password })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        message.textContent = data.message;
+        window.location.href = '/dashboard';
+      } else {
+        message.textContent = data.message;
+      }
+    });
+  </script>
+</body>
+</html>

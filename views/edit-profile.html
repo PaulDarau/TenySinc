@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <title>Editează Profil - TeniSync</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-body-register">
+  <div class="auth-container register-container">
+    <h1>Editează Profilul</h1>
+    <form id="editForm">
+      <label>Localitate:
+        <input type="text" id="location" required>
+      </label>
+      <label>Vârstă:
+        <input type="number" id="age" required>
+      </label>
+      <label>Level:
+        <select id="level">
+          <option value="Amator">Amator</option>
+          <option value="Intermediar">Intermediar</option>
+          <option value="Expert">Expert</option>
+        </select>
+      </label>
+      <button type="submit">Salvează modificările</button>
+    </form>
+    <p><a href="dashboard.html">Înapoi la Dashboard</a></p>
+  </div>
+
+  <script>
+    async function loadUserData() {
+      const res = await fetch('/api/user');
+      const user = await res.json();
+      document.getElementById('location').value = user.location;
+      document.getElementById('age').value = user.age;
+      document.getElementById('level').value = user.level;
+    }
+
+    document.getElementById('editForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const updatedData = {
+        location: document.getElementById('location').value,
+        age: parseInt(document.getElementById('age').value),
+        level: document.getElementById('level').value
+      };
+
+      const response = await fetch('/api/update-profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedData)
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert("Profil actualizat cu succes!");
+        window.location.href = '/dashboard.html';
+      } else {
+        alert(result.message || 'Eroare la actualizarea profilului.');
+      }
+    });
+
+    loadUserData();
+  </script>
+</body>
+</html>

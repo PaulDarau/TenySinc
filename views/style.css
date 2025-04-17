@@ -1,0 +1,392 @@
+/* Fundal login */
+body.auth-body {
+  background-image: url('/images/neon-tennis.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 100vh;
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* Fundal register */
+body.auth-body-register {
+  background-image: url('/images/yellow-green.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 100vh;
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.auth-container {
+  background-color: rgba(255, 255, 255, 0.93);
+  max-width: 400px;
+  width: 85%;
+  padding: 20px 25px;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.25);
+  box-sizing: border-box;
+}
+
+.auth-container h1 {
+  text-align: center;
+  margin-bottom: 18px;
+  color: #222;
+  font-size: 22px;
+}
+
+.auth-container label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #333;
+  font-size: 13px;
+}
+
+.auth-container input,
+.auth-container select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 4px;
+  margin-bottom: 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 13px;
+}
+
+.auth-container button {
+  width: 100%;
+  padding: 10px;
+  background-color: #198754;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.auth-container button:hover {
+  background-color: #146c43;
+}
+
+.auth-container p {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 13px;
+}
+
+.auth-container a {
+  color: #0d6efd;
+  text-decoration: none;
+}
+
+.auth-container a:hover {
+  text-decoration: underline;
+}
+
+/* === DASHBOARD === */
+.dashboard-body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #b6e2b3;
+}
+
+.dashboard-header {
+  background-color: #4CAF50;
+  color: white;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.dashboard-header button {
+  padding: 0.5rem 1rem;
+  background-color: white;
+  color: #4CAF50;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.dashboard-content {
+  display: flex;
+  justify-content: space-between;
+  padding: 2rem;
+  gap: 2rem;
+}
+
+.match-list {
+  flex: 2;
+  background-color: #f1f1f1;
+  padding: 1.5rem;
+  border-radius: 10px;
+}
+
+.match-header,
+.match-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.filter-bar {
+  background-color: #e0f5e9;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.filter-form {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+
+.filter-form label {
+  font-weight: bold;
+  color: #333;
+  font-size: 14px;
+}
+
+.filter-form input,
+.filter-form select {
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.filter-form button {
+  padding: 7px 12px;
+  background: linear-gradient(to right, #38b000, #008000);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  margin-top: 6px;
+}
+
+.filter-form button:hover {
+  background: linear-gradient(to right, #45c100, #006400);
+  transform: scale(1.02);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Match card */
+.match-item {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.match-item p {
+  margin: 0.3rem 0;
+}
+
+.details-button {
+  margin-top: 10px;
+  background-color: #198754;
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.details-button:hover {
+  background-color: #146c43;
+}
+
+/* Buton verde general */
+.green-button {
+  background-color: #198754;
+  color: white;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.green-button:hover {
+  background-color: #146c43;
+}
+
+/* === Dreapta dashboard === */
+.right-side {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Profil + cereri - lățime egală */
+.profile-card,
+.requests-card {
+  flex: 0 0 250px;
+  background-color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+
+.profile-card img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 0.5rem;
+}
+
+.profile-card h3 {
+  margin: 0.5rem 0;
+}
+
+.profile-card p {
+  margin: 4px 0;
+}
+
+.profile-card button {
+  margin-top: auto;
+  padding: 0.5rem 1rem;
+  background-color: #219653;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.requests-card {
+  text-align: left;
+}
+
+.requests-list {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+  font-size: 14px;
+}
+
+.requests-list li {
+  background: #eaf4ea;
+  border-radius: 6px;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.cancel-request-button {
+  margin-top: 5px;
+  background-color: #c0392b;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 13px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.cancel-request-button:hover {
+  background-color: #a93226;
+}
+/* Modal Cereri Primite */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.6);
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 5% auto;
+  padding: 2rem;
+  border: 1px solid #888;
+  border-radius: 10px;
+  width: 600px;
+  max-width: 90%;
+  box-shadow: 0 0 15px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 18px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  color: #c0392b;
+}
+
+
+
+
+
+
+
+
+.modal-content {
+  background-color: #fff;
+  margin: 5% auto;
+  padding: 2rem;
+  border: 1px solid #888;
+  border-radius: 10px;
+  width: 600px;
+  max-width: 90%;
+  box-shadow: 0 0 15px rgba(0,0,0,0.3);
+  position: relative;
+  max-height: 80vh; /* adăugat */
+  display: flex;
+  flex-direction: column;
+}
+
+#receivedRequestsContainer {
+  overflow-y: auto;
+  margin-top: 1rem;
+  max-height: 60vh; /* scroll în interiorul conținutului */
+}

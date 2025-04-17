@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <title>Creare Meci - TeniSync</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-body-register">
+  <div class="auth-container register-container">
+    <h1>Creare Meci</h1>
+    <form id="matchForm">
+      <label>Locație: <input type="text" id="location" required></label>
+      <label>Dată: <input type="date" id="date" required></label>
+      <label>Oră: <input type="time" id="time" required></label>
+      <label>Suprafață:
+        <select id="surface" required>
+          <option value="Zgură">Zgură</option>
+          <option value="Hard">Hard</option>
+          <option value="Iarbă">Iarbă</option>
+        </select>
+      </label>
+      <button type="submit">Creează Meci</button>
+    </form>
+    <p><a href="dashboard.html">Înapoi la Dashboard</a></p>
+  </div>
+
+  <script src="/js/create-match.js"></script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <title>Detalii Meci - TeniSync</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-body-register">
+  <div class="auth-container">
+    <h1>Detalii Meci</h1>
+    <div id="matchDetails">
+      <p><strong>Locație:</strong> <span id="location"></span></p>
+      <p><strong>Dată:</strong> <span id="date"></span></p>
+      <p><strong>Oră:</strong> <span id="time"></span></p>
+      <p><strong>Suprafață:</strong> <span id="surface"></span></p>
+      <hr>
+      <h3>Informații Jucător</h3>
+      <p><strong>Username:</strong> <span id="creatorUsername"></span></p>
+      <p><strong>Email:</strong> <span id="creatorEmail"></span></p>
+      <p><strong>Gen:</strong> <span id="creatorGender"></span></p>
+      <p><strong>Nivel:</strong> <span id="creatorLevel"></span></p>
+      <p><strong>Localitate:</strong> <span id="creatorLocation"></span></p>
+      <p><strong>Vârstă:</strong> <span id="creatorAge"></span></p>
+    </div>
+    
+    <button id="sendRequestBtn" class="green-button">Trimite cerere</button>
+    <button onclick="window.location.href='dashboard.html'" class="green-button" style="margin-top: 10px;">Înapoi la Dashboard</button>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const matchId = urlParams.get('id');
+
+    async function loadMatchDetails() {
+      try {
+        const res = await fetch(`/api/match/${matchId}`);
+        const match = await res.json();
+
+        document.getElementById('location').textContent = match.location;
+        document.getElementById('date').textContent = match.date;
+        document.getElementById('time').textContent = match.time;
+        document.getElementById('surface').textContent = match.surface;
+
+        document.getElementById('creatorUsername').textContent = match.creator.username;
+        document.getElementById('creatorEmail').textContent = match.creator.email;
+        document.getElementById('creatorGender').textContent = match.creator.gender;
+        document.getElementById('creatorLevel').textContent = match.creator.level;
+        document.getElementById('creatorLocation').textContent = match.creator.location;
+        document.getElementById('creatorAge').textContent = match.creator.age;
+
+      } catch (err) {
+        alert('Eroare la încărcarea detaliilor meciului.');
+      }
+    }
+
+    document.getElementById('sendRequestBtn').addEventListener('click', async () => {
+      try {
+        const res = await fetch('/api/send-request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ matchId })
+        });
+
+        const result = await res.json();
+
+        if (res.ok) {
+          alert('Cererea a fost trimisă cu succes!');
+          window.location.href = '/dashboard.html';
+        } else {
+          alert(result.message || 'Eroare la trimiterea cererii.');
+        }
+      } catch (error) {
+        alert('A apărut o eroare. Încearcă din nou.');
+      }
+    });
+
+    loadMatchDetails();
+  </script>
+</body>
+</html>
