@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <title>Meciurile mele - TeniSync</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .match-columns {
+      display: flex;
+      width: 100%;
+    }
+
+    .match-half {
+      flex: 1;
+      padding: 20px;
+      background-color: #d4f4d2;
+    }
+
+    .vertical-divider {
+      width: 2px;
+      background-color: #4CAF50;
+    }
+
+    .match-half h2 {
+      text-align: center;
+    }
+
+    .match-item {
+      background: #fff;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 10px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+
+    .score-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 10px 0;
+    }
+
+    .score-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .score-label {
+      font-weight: bold;
+      width: 100px;
+    }
+
+    .score-inputs, .score-values {
+      display: flex;
+      gap: 5px;
+    }
+
+    .score-inputs input {
+      width: 35px;
+      text-align: center;
+    }
+
+    .score-values span {
+      width: 35px;
+      text-align: center;
+    }
+
+    .star-rating {
+      display: flex;
+      gap: 5px;
+      font-size: 24px;
+      cursor: pointer;
+      margin: 10px 0;
+    }
+
+    .star {
+      color: gray;
+    }
+
+    .star.checked {
+      color: gold;
+    }
+  </style>
+</head>
+<body class="dashboard-body">
+  <header class="dashboard-header">
+    <h1>TeniSync - Meciurile mele</h1>
+    <button onclick="window.location.href='/dashboard'">Înapoi la Dashboard</button>
+  </header>
+
+  <main class="dashboard-content">
+    <div class="match-columns">
+      <div class="match-half">
+        <h2>Meciuri deschise</h2>
+        <div id="openMatchesContainer"><p>Se încarcă meciurile...</p></div>
+      </div>
+
+      <div class="vertical-divider"></div>
+
+      <div class="match-half">
+        <h2>Meciuri finalizate</h2>
+        <div id="finishedMatchesContainer"><p>Se încarcă meciurile...</p></div>
+      </div>
+    </div>
+  </main>
+
+ <!-- tot head-ul și CSS-ul rămân neschimbate -->
+
+<!-- restul paginii rămâne identic până la începutul scriptului -->
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+      loadMyMatches();
+    });
+  
+    async function loadMyMatches() {
+      try {
+        const res = await fetch('/api/my-matches');
+        const { accepted, finalized, userId } = await res.json();
+  
+        const openContainer = document.getElementById('openMatchesContainer');
+        const finishedContainer = document.getElementById('finishedMatchesContainer');
+  
+        openContainer.innerHTML = '';
+        finishedContainer.innerHTML = '';
+  
+        // === Meciuri deschise ===
+        if (!accepted.length) {
+          openContainer.innerHTML = '<p>Nu ai meciuri deschise.</p>';
+        } else {
+          accepted.forEach(match => {
+            const div = document.createElement('div');
+            div.className = 'match-item';
+  
+            const isCreator = match.creator._id === userId;
+            const player = isCreator ? match.opponent : match.creator;
+  
+            let html = `
+              <p><strong>Locație:</strong> ${match.location}</p>
+              <p><strong>Dată:</strong> ${match.date}</p>
+              <p><strong>Oră:</strong> ${match.time}</p>
+              <p><strong>Adversar:</strong> ${player.username}</p>
+            `;
+  
+            if (isCreator) {
+              html += `
+                <div class="score-grid">
+                  <div class="score-row">
+                    <span class="score-label">${match.creator.username}</span>
+                    <div class="score-inputs">
+                      <input type="number" min="0" max="7" id="p1s1-${match._id}">
+                      <input type="number" min="0" max="7" id="p1s2-${match._id}">
+                      <input type="number" min="0" max="7" id="p1s3-${match._id}">
+                    </div>
+                  </div>
+                  <div class="score-row">
+                    <span class="score-label">${match.opponent.username}</span>
+                    <div class="score-inputs">
+                      <input type="number" min="0" max="7" id="p2s1-${match._id}">
+                      <input type="number" min="0" max="7" id="p2s2-${match._id}">
+                      <input type="number" min="0" max="7" id="p2s3-${match._id}">
+                    </div>
+                  </div>
+                </div>
+  
+                <div class="star-rating" data-matchid="${match._id}">
+                  ${[1,2,3,4,5].map(i => `<span class="star" data-value="${i}">&#9733;</span>`).join('')}
+                </div>
+  
+                <button class="green-button" onclick="finalizeMatch('${match._id}')">Finalizează meci</button>
+              `;
+            } else {
+              html += `<p><em>Așteaptă finalizarea meciului de către creator.</em></p>`;
+            }
+  
+            div.innerHTML = html;
+            openContainer.appendChild(div);
+          });
+        }
+  
+        // === Meciuri finalizate ===
+        if (!finalized.length) {
+          finishedContainer.innerHTML = '<p>Nu ai meciuri finalizate.</p>';
+        } else {
+          finalized.forEach(match => {
+            const s1 = match.score[0], s2 = match.score[1], s3 = match.score[2];
+            const div = document.createElement('div');
+            div.className = 'match-item';
+  
+            const isCreator = match.creator._id === userId;
+            const player1 = isCreator ? match.creator : match.opponent;
+            const player2 = isCreator ? match.opponent : match.creator;
+  
+            const score1 = isCreator
+              ? [s1?.creatorScore, s2?.creatorScore, s3?.creatorScore]
+              : [s1?.opponentScore, s2?.opponentScore, s3?.opponentScore];
+            const score2 = isCreator
+              ? [s1?.opponentScore, s2?.opponentScore, s3?.opponentScore]
+              : [s1?.creatorScore, s2?.creatorScore, s3?.creatorScore];
+  
+            const showSet3 = (score1[2] || score2[2]) > 0;
+  
+            let html = `
+              <p><strong>Locație:</strong> ${match.location}</p>
+              <p><strong>Dată:</strong> ${match.date}</p>
+              <div class="score-grid">
+                <div class="score-row">
+                  <span class="score-label">${player1.username}</span>
+                  <div class="score-values">
+                    <span>${score1[0]}</span>
+                    <span>${score1[1]}</span>
+                    ${showSet3 ? `<span>${score1[2]}</span>` : ''}
+                  </div>
+                </div>
+                <div class="score-row">
+                  <span class="score-label">${player2.username}</span>
+                  <div class="score-values">
+                    <span>${score2[0]}</span>
+                    <span>${score2[1]}</span>
+                    ${showSet3 ? `<span>${score2[2]}</span>` : ''}
+                  </div>
+                </div>
+              </div>
+            `;
+  
+            div.innerHTML = html;
+            finishedContainer.appendChild(div);
+          });
+        }
+  
+        activateStars();
+      } catch (err) {
+        console.error('Eroare la încărcarea meciurilor:', err);
+      }
+    }
+  
+    function activateStars() {
+      document.querySelectorAll('.star-rating').forEach(div => {
+        const stars = div.querySelectorAll('.star');
+        stars.forEach(star => {
+          star.addEventListener('mouseenter', () => {
+            const val = +star.dataset.value;
+            stars.forEach(s => s.classList.toggle('checked', +s.dataset.value <= val));
+          });
+          star.addEventListener('click', () => {
+            div.dataset.selected = star.dataset.value;
+          });
+          star.addEventListener('mouseleave', () => {
+            const val = div.dataset.selected || 0;
+            stars.forEach(s => s.classList.toggle('checked', +s.dataset.value <= val));
+          });
+        });
+      });
+    }
+  
+    async function finalizeMatch(matchId) {
+      const score = [
+        {
+          creatorScore: +document.getElementById(`p1s1-${matchId}`).value || 0,
+          opponentScore: +document.getElementById(`p2s1-${matchId}`).value || 0
+        },
+        {
+          creatorScore: +document.getElementById(`p1s2-${matchId}`).value || 0,
+          opponentScore: +document.getElementById(`p2s2-${matchId}`).value || 0
+        },
+        {
+          creatorScore: +document.getElementById(`p1s3-${matchId}`).value || 0,
+          opponentScore: +document.getElementById(`p2s3-${matchId}`).value || 0
+        }
+      ];
+  
+      const ratingEl = document.querySelector(`.star-rating[data-matchid="${matchId}"]`);
+      const rating = +ratingEl?.dataset.selected || 0;
+  
+      if (!confirm("Ești sigur că vrei să finalizezi acest meci?")) return;
+  
+      try {
+        const res = await fetch('/api/finalize-match/' + matchId, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ score, rating })
+        });
+        const data = await res.json();
+        alert(data.message);
+        loadMyMatches();
+      } catch (err) {
+        alert('Eroare la finalizarea meciului.');
+      }
+    }
+  </script>
+  
+  
+</body>
+</html>

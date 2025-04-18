@@ -8,9 +8,7 @@ exports.sendRequest = async (req, res) => {
     const senderId = req.session.user.id;
 
     const match = await Match.findById(matchId);
-    if (!match) {
-      return res.status(404).json({ message: 'Meciul nu a fost găsit' });
-    }
+    if (!match) return res.status(404).json({ message: 'Meciul nu a fost găsit' });
 
     if (match.creator.toString() === senderId) {
       return res.status(400).json({ message: 'Nu poți trimite cerere la propriul tău meci' });
@@ -21,12 +19,9 @@ exports.sendRequest = async (req, res) => {
       return res.status(400).json({ message: 'Ai trimis deja o cerere pentru acest meci' });
     }
 
-    const newRequest = new Request({
-      match: matchId,
-      sender: senderId
-    });
-
+    const newRequest = new Request({ match: matchId, sender: senderId });
     await newRequest.save();
+
     res.status(201).json({ message: 'Cerere trimisă cu succes!' });
   } catch (err) {
     console.error('Eroare la trimiterea cererii:', err);
@@ -34,28 +29,40 @@ exports.sendRequest = async (req, res) => {
   }
 };
 
-// ✅ Afișează cererile trimise
+// ✅ Cereri trimise (exclude meciuri finalizate)
 exports.getSentRequests = async (req, res) => {
   try {
     const requests = await Request.find({ sender: req.session.user.id })
       .populate('match')
       .sort({ createdAt: -1 });
-    res.status(200).json(requests);
+
+    const filtered = requests.filter(req => req.match && !req.match.isPlayed);
+    res.status(200).json(filtered);
   } catch (err) {
     console.error('Eroare la obținerea cererilor trimise:', err);
     res.status(500).json({ message: 'Eroare la obținerea cererilor trimise' });
   }
 };
 
-// ✅ Afișează cererile primite
+// ✅ Cereri primite (doar cereri TRIMISE, pentru meciuri nefinalizate și fără cerere acceptată deja)
 exports.getReceivedRequests = async (req, res) => {
   try {
     const userId = req.session.user.id;
 
-    const userMatches = await Match.find({ creator: userId }).select('_id');
-    const matchIds = userMatches.map(m => m._id);
+    const userMatches = await Match.find({ creator: userId });
+    const validMatches = [];
 
-    const requests = await Request.find({ match: { $in: matchIds } })
+    for (const match of userMatches) {
+      const hasAccepted = await Request.findOne({ match: match._id, status: 'acceptată' });
+      if (!match.isPlayed && !hasAccepted) {
+        validMatches.push(match._id);
+      }
+    }
+
+    const requests = await Request.find({
+        match: { $in: validMatches },
+        status: 'trimisă'
+      })
       .populate('sender', 'username email level age location gender')
       .populate('match', 'location date time surface')
       .sort({ createdAt: -1 });
@@ -67,7 +74,7 @@ exports.getReceivedRequests = async (req, res) => {
   }
 };
 
-// ✅ Actualizare status cerere (acceptată / respinsă)
+// ✅ Actualizare status cerere
 exports.updateRequestStatus = async (req, res) => {
   try {
     const requestId = req.params.id;
@@ -79,9 +86,7 @@ exports.updateRequestStatus = async (req, res) => {
     }
 
     const request = await Request.findById(requestId);
-    if (!request) {
-      return res.status(404).json({ message: 'Cererea nu a fost găsită' });
-    }
+    if (!request) return res.status(404).json({ message: 'Cererea nu a fost găsită' });
 
     const match = await Match.findById(request.match);
     if (!match || match.creator.toString() !== userId) {
@@ -91,9 +96,32 @@ exports.updateRequestStatus = async (req, res) => {
     request.status = status;
     await request.save();
 
+    if (status === 'acceptată') {
+      match.players = [match.creator, request.sender];
+      await match.save();
+    }
+
     res.status(200).json({ message: `Cererea a fost ${status}` });
   } catch (err) {
     console.error('Eroare la actualizarea cererii:', err);
     res.status(500).json({ message: 'Eroare la actualizarea cererii' });
+  }
+};
+
+// ✅ Anulare cerere
+exports.cancelRequest = async (req, res) => {
+  try {
+    const requestId = req.params.id;
+    const deleted = await Request.findOneAndDelete({
+      _id: requestId,
+      sender: req.session.user.id
+    });
+
+    if (!deleted) return res.status(404).json({ message: 'Cererea nu a fost găsită' });
+
+    res.status(200).json({ message: 'Cererea a fost anulată' });
+  } catch (err) {
+    console.error('Eroare la anularea cererii:', err);
+    res.status(500).json({ message: 'Eroare internă la anulare' });
   }
 };
