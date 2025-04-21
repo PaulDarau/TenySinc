@@ -81,6 +81,83 @@
     .star.checked {
       color: gold;
     }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+    }
+
+    .modal-content {
+      background-color: white;
+      margin: auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 320px;
+      max-width: 90%;
+      text-align: center;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+
+    .modal-buttons {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .modal-buttons button {
+      flex: 1;
+      padding: 8px 0;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+    }
+
+    .modal-buttons .green-button {
+      background-color: #198754;
+      color: white;
+    }
+
+    .modal-buttons .cancel-request-button {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .notification {
+  all: unset;
+  position: fixed;
+  top: 50%;
+  left: 39%;
+  transform: translate(-50%, -50%);
+  background-color: #198754;
+  color: white;
+  padding: 16px 28px;
+  border-radius: 10px;
+  font-size: 16px;
+  z-index: 9999;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  max-width: 80%;
+  text-align: center;
+}
+
+
+
+    .notification.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
   </style>
 </head>
 <body class="dashboard-body">
@@ -105,44 +182,52 @@
     </div>
   </main>
 
- <!-- tot head-ul și CSS-ul rămân neschimbate -->
+  <!-- Modal confirmare finalizare -->
+  <div id="confirmFinalizeModal" class="modal">
+    <div class="modal-content">
+      <p>Ești sigur că vrei să finalizezi acest meci?</p>
+      <div class="modal-buttons">
+        <button id="confirmFinalizeYes" class="green-button">Da</button>
+        <button id="confirmFinalizeNo" class="cancel-request-button">Nu</button>
+      </div>
+    </div>
+  </div>
 
-<!-- restul paginii rămâne identic până la începutul scriptului -->
+  <!-- Notificare succes -->
+  <div id="successNotif" class="notification">✅ Meci finalizat cu succes!</div>
 
-<script>
+  <script>
     document.addEventListener("DOMContentLoaded", () => {
       loadMyMatches();
     });
-  
+
     async function loadMyMatches() {
       try {
         const res = await fetch('/api/my-matches');
         const { accepted, finalized, userId } = await res.json();
-  
+
         const openContainer = document.getElementById('openMatchesContainer');
         const finishedContainer = document.getElementById('finishedMatchesContainer');
-  
+
         openContainer.innerHTML = '';
         finishedContainer.innerHTML = '';
-  
-        // === Meciuri deschise ===
+
         if (!accepted.length) {
           openContainer.innerHTML = '<p>Nu ai meciuri deschise.</p>';
         } else {
           accepted.forEach(match => {
             const div = document.createElement('div');
             div.className = 'match-item';
-  
             const isCreator = match.creator._id === userId;
             const player = isCreator ? match.opponent : match.creator;
-  
+
             let html = `
               <p><strong>Locație:</strong> ${match.location}</p>
               <p><strong>Dată:</strong> ${match.date}</p>
               <p><strong>Oră:</strong> ${match.time}</p>
               <p><strong>Adversar:</strong> ${player.username}</p>
             `;
-  
+
             if (isCreator) {
               html += `
                 <div class="score-grid">
@@ -163,23 +248,22 @@
                     </div>
                   </div>
                 </div>
-  
+
                 <div class="star-rating" data-matchid="${match._id}">
                   ${[1,2,3,4,5].map(i => `<span class="star" data-value="${i}">&#9733;</span>`).join('')}
                 </div>
-  
+
                 <button class="green-button" onclick="finalizeMatch('${match._id}')">Finalizează meci</button>
               `;
             } else {
               html += `<p><em>Așteaptă finalizarea meciului de către creator.</em></p>`;
             }
-  
+
             div.innerHTML = html;
             openContainer.appendChild(div);
           });
         }
-  
-        // === Meciuri finalizate ===
+
         if (!finalized.length) {
           finishedContainer.innerHTML = '<p>Nu ai meciuri finalizate.</p>';
         } else {
@@ -187,20 +271,20 @@
             const s1 = match.score[0], s2 = match.score[1], s3 = match.score[2];
             const div = document.createElement('div');
             div.className = 'match-item';
-  
+
             const isCreator = match.creator._id === userId;
             const player1 = isCreator ? match.creator : match.opponent;
             const player2 = isCreator ? match.opponent : match.creator;
-  
+
             const score1 = isCreator
               ? [s1?.creatorScore, s2?.creatorScore, s3?.creatorScore]
               : [s1?.opponentScore, s2?.opponentScore, s3?.opponentScore];
             const score2 = isCreator
               ? [s1?.opponentScore, s2?.opponentScore, s3?.opponentScore]
               : [s1?.creatorScore, s2?.creatorScore, s3?.creatorScore];
-  
+
             const showSet3 = (score1[2] || score2[2]) > 0;
-  
+
             let html = `
               <p><strong>Locație:</strong> ${match.location}</p>
               <p><strong>Dată:</strong> ${match.date}</p>
@@ -223,18 +307,17 @@
                 </div>
               </div>
             `;
-  
             div.innerHTML = html;
             finishedContainer.appendChild(div);
           });
         }
-  
+
         activateStars();
       } catch (err) {
         console.error('Eroare la încărcarea meciurilor:', err);
       }
     }
-  
+
     function activateStars() {
       document.querySelectorAll('.star-rating').forEach(div => {
         const stars = div.querySelectorAll('.star');
@@ -253,9 +336,15 @@
         });
       });
     }
-  
-    async function finalizeMatch(matchId) {
-      const score = [
+
+    let matchToFinalizeId = null;
+    let scoreToFinalize = null;
+    let ratingToFinalize = null;
+
+    function finalizeMatch(matchId) {
+      matchToFinalizeId = matchId;
+
+      scoreToFinalize = [
         {
           creatorScore: +document.getElementById(`p1s1-${matchId}`).value || 0,
           opponentScore: +document.getElementById(`p2s1-${matchId}`).value || 0
@@ -269,27 +358,40 @@
           opponentScore: +document.getElementById(`p2s3-${matchId}`).value || 0
         }
       ];
-  
+
       const ratingEl = document.querySelector(`.star-rating[data-matchid="${matchId}"]`);
-      const rating = +ratingEl?.dataset.selected || 0;
-  
-      if (!confirm("Ești sigur că vrei să finalizezi acest meci?")) return;
-  
+      ratingToFinalize = +ratingEl?.dataset.selected || 0;
+
+      document.getElementById('confirmFinalizeModal').style.display = 'flex';
+    }
+
+    document.getElementById('confirmFinalizeYes').addEventListener('click', async () => {
       try {
-        const res = await fetch('/api/finalize-match/' + matchId, {
+        const res = await fetch('/api/finalize-match/' + matchToFinalizeId, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ score, rating })
+          body: JSON.stringify({ score: scoreToFinalize, rating: ratingToFinalize })
         });
-        const data = await res.json();
-        alert(data.message);
+
+        document.getElementById('confirmFinalizeModal').style.display = 'none';
+        showSuccessNotif();
         loadMyMatches();
       } catch (err) {
         alert('Eroare la finalizarea meciului.');
       }
+    });
+
+    document.getElementById('confirmFinalizeNo').addEventListener('click', () => {
+      document.getElementById('confirmFinalizeModal').style.display = 'none';
+    });
+
+    function showSuccessNotif() {
+      const notif = document.getElementById('successNotif');
+      notif.classList.add('show');
+      setTimeout(() => {
+        notif.classList.remove('show');
+      }, 2500);
     }
   </script>
-  
-  
 </body>
 </html>

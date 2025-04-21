@@ -13,10 +13,33 @@
       color: gold;
       vertical-align: middle;
     }
+
+    .notification {
+      position: fixed;
+      top: 50%;
+      left: 39%;
+      transform: translate(-50%, -50%);
+      background-color: #198754;
+      color: white;
+      padding: 12px 22px;
+      border-radius: 10px;
+      font-size: 15px;
+      z-index: 9999;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+      text-align: center;
+      max-width: 300px;
+    }
+
+    .notification.show {
+      opacity: 1;
+    }
   </style>
 </head>
 <body class="auth-body-register">
   <div class="auth-container">
+    <div id="notif" class="notification"></div>
     <h1>Detalii Meci</h1>
     <div id="matchDetails">
       <p><strong>Locație:</strong> <span id="location"></span></p>
@@ -31,7 +54,6 @@
           <span id="creatorRating" class="star-container" style="margin-left: 8px;"></span>
         </span>
       </p>
-      
       <p><strong>Email:</strong> <span id="creatorEmail"></span></p>
       <p><strong>Gen:</strong> <span id="creatorGender"></span></p>
       <p><strong>Nivel:</strong> <span id="creatorLevel"></span></p>
@@ -64,11 +86,10 @@
         document.getElementById('creatorLocation').textContent = match.creator.location;
         document.getElementById('creatorAge').textContent = match.creator.age;
 
-        // Afișează stelele ratingului creatorului
         loadCreatorRating(match.creator._id);
 
       } catch (err) {
-        alert('Eroare la încărcarea detaliilor meciului.');
+        showNotification('Eroare la încărcarea detaliilor meciului.', true);
       }
     }
 
@@ -83,15 +104,23 @@
         const result = await res.json();
 
         if (res.ok) {
-          alert('Cererea a fost trimisă cu succes!');
-          window.location.href = '/dashboard.html';
+          showNotification('✅ Cerere trimisă cu succes!');
+          setTimeout(() => window.location.href = '/dashboard.html', 2000);
         } else {
-          alert(result.message || 'Eroare la trimiterea cererii.');
+          showNotification(result.message || 'Eroare la trimiterea cererii.', true);
         }
       } catch (error) {
-        alert('A apărut o eroare. Încearcă din nou.');
+        showNotification('A apărut o eroare. Încearcă din nou.', true);
       }
     });
+
+    function showNotification(message, isError = false) {
+      const notif = document.getElementById('notif');
+      notif.textContent = message;
+      notif.style.backgroundColor = isError ? '#dc3545' : '#198754';
+      notif.classList.add('show');
+      setTimeout(() => notif.classList.remove('show'), 2000);
+    }
 
     async function loadCreatorRating(userId) {
       try {
@@ -105,22 +134,21 @@
       }
     }
 
-    
     function renderStars(container, rating) {
-  const rounded = Math.round(parseFloat(rating) * 2) / 2;
-  container.innerHTML = '';
-  for (let i = 1; i <= 5; i++) {
-    const icon = document.createElement('i');
-    if (rounded >= i) {
-      icon.className = 'fas fa-star';
-    } else if (rounded + 0.5 === i) {
-      icon.className = 'fas fa-star-half-alt';
-    } else {
-      icon.className = 'far fa-star';
+      const rounded = Math.round(parseFloat(rating) * 2) / 2;
+      container.innerHTML = '';
+      for (let i = 1; i <= 5; i++) {
+        const icon = document.createElement('i');
+        if (rounded >= i) {
+          icon.className = 'fas fa-star';
+        } else if (rounded + 0.5 === i) {
+          icon.className = 'fas fa-star-half-alt';
+        } else {
+          icon.className = 'far fa-star';
+        }
+        container.appendChild(icon);
+      }
     }
-    container.appendChild(icon);
-  }
-}
 
     loadMatchDetails();
   </script>
