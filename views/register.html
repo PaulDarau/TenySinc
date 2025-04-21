@@ -10,6 +10,32 @@
       emailjs.init("wyd9KeK2M6u72rixn");
     })();
   </script>
+  <style>
+    .notification {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+      padding: 15px 25px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      text-align: center;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      animation: fadeInOut 3s ease-in-out forwards;
+    }
+
+    .notification.success { background-color: #4CAF50; color: white; }
+    .notification.error { background-color: #f44336; color: white; }
+
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translate(-50%, -60%); }
+      10% { opacity: 1; transform: translate(-50%, -50%); }
+      90% { opacity: 1; transform: translate(-50%, -50%); }
+      100% { opacity: 0; transform: translate(-50%, -60%); }
+    }
+  </style>
 </head>
 <body class="auth-body-register">
   <div class="auth-container register-container">
@@ -43,7 +69,18 @@
     <p>Ai deja cont? <a href="login.html">Autentifică-te aici</a>.</p>
   </div>
 
+  <!-- Notificare dinamică -->
+  <div id="notification" class="notification" style="display: none;"></div>
+
   <script>
+    const showNotification = (message, type = 'success') => {
+      const notif = document.getElementById('notification');
+      notif.textContent = message;
+      notif.className = `notification ${type}`;
+      notif.style.display = 'block';
+      setTimeout(() => { notif.style.display = 'none'; }, 3000);
+    };
+
     document.getElementById('registerForm').addEventListener('submit', async function (e) {
       e.preventDefault();
 
@@ -71,18 +108,18 @@
             name: "TeniSync Bot",
             message: "Contul tău a fost creat cu succes! Bine ai venit în TeniSync 🎾"
           }).then(() => {
-            alert("Înregistrare reușită! Verifică emailul 📩");
-            window.location.href = '/login.html';
+            showNotification("Înregistrare reușită! Verifică emailul 📩", "success");
+            setTimeout(() => window.location.href = '/login.html', 2500);
           }).catch(() => {
-            alert("Contul a fost creat, dar nu s-a trimis emailul de confirmare.");
-            window.location.href = '/login.html';
+            showNotification("Contul a fost creat, dar nu s-a trimis emailul.", "error");
+            setTimeout(() => window.location.href = '/login.html', 2500);
           });
         } else {
-          alert(result.message || 'Eroare la înregistrare');
+          showNotification(result.message || 'Email sau username deja folosit.', "error");
         }
 
       } catch (err) {
-        alert("A apărut o eroare. Încearcă din nou.");
+        showNotification("A apărut o eroare. Încearcă din nou.", "error");
       }
     });
   </script>

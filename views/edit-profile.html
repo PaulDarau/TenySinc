@@ -4,6 +4,26 @@
   <meta charset="UTF-8">
   <title>Editează Profil - TeniSync</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    .custom-notification {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 16px 28px;
+      background-color: #4CAF50;
+      color: white;
+      font-size: 16px;
+      border-radius: 8px;
+      z-index: 9999;
+      opacity: 0.95;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      transition: opacity 0.3s ease;
+    }
+    .custom-notification.hidden {
+      display: none;
+    }
+  </style>
 </head>
 <body class="auth-body-register">
   <div class="auth-container register-container">
@@ -25,6 +45,11 @@
       <button type="submit">Salvează modificările</button>
     </form>
     <p><a href="dashboard.html">Înapoi la Dashboard</a></p>
+  </div>
+
+  <!-- ✅ Notificare vizuală -->
+  <div id="notif-success" class="custom-notification hidden">
+    Profil actualizat cu succes!
   </div>
 
   <script>
@@ -54,8 +79,12 @@
       const result = await response.json();
 
       if (response.ok) {
-        alert("Profil actualizat cu succes!");
-        window.location.href = '/dashboard.html';
+        const notif = document.getElementById('notif-success');
+        notif.classList.remove('hidden');
+        setTimeout(() => {
+          notif.classList.add('hidden');
+          window.location.href = '/dashboard.html';
+        }, 2500);
       } else {
         alert(result.message || 'Eroare la actualizarea profilului.');
       }

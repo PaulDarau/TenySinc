@@ -3,7 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <title>Detalii Meci - TeniSync</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
+  <style>
+    .star-container {
+      display: inline-flex;
+      gap: 2px;
+      font-size: 14px;
+      color: gold;
+      vertical-align: middle;
+    }
+  </style>
 </head>
 <body class="auth-body-register">
   <div class="auth-container">
@@ -15,7 +25,13 @@
       <p><strong>Suprafață:</strong> <span id="surface"></span></p>
       <hr>
       <h3>Informații Jucător</h3>
-      <p><strong>Username:</strong> <span id="creatorUsername"></span></p>
+      <p><strong>Username:</strong> 
+        <span style="display: inline-flex; align-items: center;">
+          <span id="creatorUsername"></span>
+          <span id="creatorRating" class="star-container" style="margin-left: 8px;"></span>
+        </span>
+      </p>
+      
       <p><strong>Email:</strong> <span id="creatorEmail"></span></p>
       <p><strong>Gen:</strong> <span id="creatorGender"></span></p>
       <p><strong>Nivel:</strong> <span id="creatorLevel"></span></p>
@@ -48,6 +64,9 @@
         document.getElementById('creatorLocation').textContent = match.creator.location;
         document.getElementById('creatorAge').textContent = match.creator.age;
 
+        // Afișează stelele ratingului creatorului
+        loadCreatorRating(match.creator._id);
+
       } catch (err) {
         alert('Eroare la încărcarea detaliilor meciului.');
       }
@@ -73,6 +92,35 @@
         alert('A apărut o eroare. Încearcă din nou.');
       }
     });
+
+    async function loadCreatorRating(userId) {
+      try {
+        const res = await fetch(`/api/user-rating/${userId}`);
+        const data = await res.json();
+        const rating = data.avgRating || 0;
+        const container = document.getElementById('creatorRating');
+        renderStars(container, rating);
+      } catch (err) {
+        console.error('Eroare la încărcarea ratingului:', err);
+      }
+    }
+
+    
+    function renderStars(container, rating) {
+  const rounded = Math.round(parseFloat(rating) * 2) / 2;
+  container.innerHTML = '';
+  for (let i = 1; i <= 5; i++) {
+    const icon = document.createElement('i');
+    if (rounded >= i) {
+      icon.className = 'fas fa-star';
+    } else if (rounded + 0.5 === i) {
+      icon.className = 'fas fa-star-half-alt';
+    } else {
+      icon.className = 'far fa-star';
+    }
+    container.appendChild(icon);
+  }
+}
 
     loadMatchDetails();
   </script>

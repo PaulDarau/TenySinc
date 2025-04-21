@@ -4,9 +4,37 @@
   <meta charset="UTF-8">
   <title>Creare Meci - TeniSync</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    .notification {
+      position: fixed;
+      top: 50%;
+      left: 39%;
+      transform: translate(-50%, -50%);
+      background-color: #198754;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+      text-align: center;
+      max-width: 300px;
+    }
+  
+    .notification.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  </style>
+  
+  
 </head>
 <body class="auth-body-register">
   <div class="auth-container register-container">
+    <div id="successNotif" class="notification">✅ Meci creat cu succes!</div>
     <h1>Creare Meci</h1>
     <form id="matchForm">
       <label>Locație: <input type="text" id="location" required></label>
@@ -24,6 +52,39 @@
     <p><a href="dashboard.html">Înapoi la Dashboard</a></p>
   </div>
 
-  <script src="/js/create-match.js"></script>
+  
+
+
+  <script>
+    document.getElementById('matchForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const location = document.getElementById('location').value;
+      const date = document.getElementById('date').value;
+      const time = document.getElementById('time').value;
+      const surface = document.getElementById('surface').value;
+
+      try {
+        const res = await fetch('/api/create-match', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ location, date, time, surface })
+        });
+
+        if (res.ok) {
+          const notif = document.getElementById('successNotif');
+          notif.classList.add('show');
+          setTimeout(() => {
+            notif.classList.remove('show');
+            window.location.href = '/dashboard.html';
+          }, 2000);
+        } else {
+          alert('A apărut o eroare la crearea meciului.');
+        }
+      } catch {
+        alert('Eroare de rețea.');
+      }
+    });
+  </script>
 </body>
 </html>

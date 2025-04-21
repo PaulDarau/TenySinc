@@ -7,6 +7,7 @@ const path = require('path');
 const authRoutes = require('./routes/authRoutes');
 const matchRoutes = require('./routes/matchRoutes');
 const requestRoutes = require('./routes/requestRoutes');
+const userRoutes = require('./routes/userRoutes');
 const isAuthenticated = require('./middleware/isAuthenticated');
 
 const app = express();
@@ -19,7 +20,7 @@ app.use(session({
   secret: 'tenisync_secret',
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: false } // true dacă ai HTTPS
+  cookie: { secure: false } // setează true dacă folosești HTTPS
 }));
 
 // ======= Conectare MongoDB =======
@@ -34,6 +35,7 @@ mongoose.connect('mongodb+srv://pauldarau2:Adrian2002@cluster0.odn8gc5.mongodb.n
 app.use('/api', authRoutes);
 app.use('/api', matchRoutes);
 app.use('/api', requestRoutes);
+app.use('/api', userRoutes); // ruta pentru rating mediu
 
 // ======= Servire fișiere HTML =======
 app.use(express.static('views'));
@@ -50,7 +52,6 @@ app.get('/match-details', isAuthenticated, (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'match-details.html'));
 });
 
-// ✅ Nou: Pagina "Meciurile mele"
 app.get('/my-matches', isAuthenticated, (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'my-matches.html'));
 });

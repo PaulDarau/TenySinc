@@ -29,6 +29,7 @@ body.auth-body-register {
 }
 
 .auth-container {
+  position: relative;
   background-color: rgba(255, 255, 255, 0.93);
   max-width: 400px;
   width: 85%;
@@ -442,4 +443,89 @@ body.auth-body-register {
   flex-direction: column;
   align-items: flex-end;
   font-weight: bold;
+}
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #333;
+  color: white;
+  padding: 14px 20px;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  font-size: 14px;
+}
+
+.notification.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.notification.success {
+  background-color: #4CAF50;
+}
+
+.notification.error {
+  background-color: #f44336;
+}
+.message-text {
+  color: red;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 10px;
+}
+/* Modal confirmare anulare cerere */
+#confirmCancelModal {
+  display: none;
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 1000;
+  background-color: rgba(0,0,0,0.2);
+  width: auto;
+  height: auto;
+}
+
+#confirmCancelModal .modal-content {
+  background-color: #fff;
+  padding: 20px 25px;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  width: 300px;
+  text-align: center;
+}
+
+#confirmCancelModal .modal-content p {
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+#confirmCancelModal .modal-content button {
+  width: 100px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#confirmCancelModal .green-button {
+  background-color: #198754;
+  color: white;
+}
+
+#confirmCancelModal .cancel-request-button {
+  background-color: #c0392b;
+  color: white;
+}
+
+#confirmCancelModal .modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
 }

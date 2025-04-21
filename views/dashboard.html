@@ -3,11 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <title>Dashboard - TeniSync</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
   <style>
     .status-verde { color: green; font-weight: bold; }
     .status-rosu { color: red; font-weight: bold; }
     .scroll-modal { max-height: 400px; overflow-y: auto; }
+    .star-container {
+      display: inline-flex;
+      gap: 2px;
+      font-size: 18px;
+      color: gold;
+      vertical-align: middle;
+    }
   </style>
 </head>
 <body class="dashboard-body">
@@ -26,8 +34,6 @@
           <button onclick="window.location.href='create-match.html'" class="green-button">+ Creare Meci</button>
         </div>
       </div>
-      
-
       <div class="filter-bar">
         <form id="filterForm" class="filter-form">
           <label>Localitate: <input type="text" id="filterLocation" placeholder="Oricare"></label>
@@ -44,7 +50,6 @@
           <button type="button" id="resetFilters">Resetează filtrele</button>
         </form>
       </div>
-
       <div id="matchContainer"></div>
     </section>
 
@@ -52,6 +57,7 @@
       <aside class="profile-card" id="profile">
         <img id="avatar" src="/images/avatar-male.jpg" alt="Avatar">
         <h3 id="username">Utilizator</h3>
+        <div id="profile-stars" class="star-container"></div>
         <p><strong>Email:</strong> <span id="email"></span></p>
         <p><strong>Gen:</strong> <span id="gender"></span></p>
         <p><strong>Nivel:</strong> <span id="level"></span></p>
@@ -79,190 +85,258 @@
     </div>
   </div>
 
+  <div id="confirmCancelModal">
+    <div class="modal-content">
+      <p>Ești sigur că vrei să anulezi această cerere?</p>
+      <div class="modal-buttons">
+        <button id="confirmYes" class="green-button">Da</button>
+        <button id="confirmNo" class="cancel-request-button">Nu</button>
+      </div>
+    </div>
+  </div>
+   
+
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      getUserData();
-      loadMatches();
-      loadSentRequests();
+   async function getUserData() {
+  const res = await fetch('/api/user');
+  const user = await res.json();
 
-      document.getElementById('filterForm').addEventListener('submit', e => {
-        e.preventDefault();
-        const filters = {
-          location: document.getElementById('filterLocation').value,
-          date: document.getElementById('filterDate').value,
-          surface: document.getElementById('filterSurface').value
-        };
-        loadMatches(filters);
-      });
+  document.getElementById('username').textContent = user.username;
+  document.getElementById('email').textContent = user.email;
+  document.getElementById('gender').textContent = user.gender;
+  document.getElementById('level').textContent = user.level;
+  document.getElementById('location').textContent = user.location;
+  document.getElementById('age').textContent = user.age;
 
-      document.getElementById('resetFilters').addEventListener('click', () => {
-        document.getElementById('filterLocation').value = '';
-        document.getElementById('filterDate').value = '';
-        document.getElementById('filterSurface').value = '';
-        loadMatches();
-      });
+  const avatarPath = user.gender === 'Feminin'
+    ? '/images/sport_avatar_woman_girl_-05-512.webp'
+    : '/images/avatar-of-a-tennis-character-free-vector.jpg';
 
-      document.getElementById('receivedRequestsBtn').addEventListener('click', openModal);
-    });
+  document.getElementById('avatar').src = avatarPath;
 
-    async function getUserData() {
-      const res = await fetch('/api/user');
-      const user = await res.json();
-      document.getElementById('username').textContent = user.username;
-      document.getElementById('email').textContent = user.email;
-      document.getElementById('gender').textContent = user.gender;
-      document.getElementById('level').textContent = user.level;
-      document.getElementById('location').textContent = user.location;
-      document.getElementById('age').textContent = user.age;
-      const avatarPath = user.gender === 'Feminin'
-        ? '/images/sport_avatar_woman_girl_-05-512.webp'
-        : '/images/avatar-of-a-tennis-character-free-vector.jpg';
-      document.getElementById('avatar').src = avatarPath;
-    }
+  const rating = await getUserRating(user._id);
+  const stars = renderStars(rating);
+  const starsContainer = document.createElement('div');
+  starsContainer.className = 'star-container';
+  starsContainer.innerHTML = stars;
+  document.getElementById('username').insertAdjacentElement('afterend', starsContainer);
+}
 
-    function logout() {
-      fetch('/api/logout').then(() => window.location.href = '/login.html');
-    }
+function logout() {
+  fetch('/api/logout').then(() => window.location.href = '/login.html');
+}
 
-    function editProfile() {
-      window.location.href = '/edit-profile.html';
-    }
+function editProfile() {
+  window.location.href = '/edit-profile.html';
+}
 
-    async function loadMatches(filters = {}) {
-      const query = Object.keys(filters)
-        .map(k => filters[k] ? `${k}=${encodeURIComponent(filters[k])}` : '')
-        .filter(Boolean).join('&');
-      const res = await fetch(`/api/matches${query ? '?' + query : ''}`);
-      const matches = await res.json();
-      const container = document.getElementById('matchContainer');
-      container.innerHTML = '';
-      if (!matches.length) return;
-      matches.forEach(match => {
-        const div = document.createElement('div');
-        div.className = 'match-item';
-        div.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-              <p><strong>Locație:</strong> ${match.location}</p>
-              <p><strong>Dată:</strong> ${match.date}</p>
-              <p><strong>Oră:</strong> ${match.time}</p>
-              <p><strong>Suprafață:</strong> ${match.surface}</p>
-            </div>
-            <div style="margin-left: 20px;">
-              <button onclick="window.location.href='match-details.html?id=${match._id}'" class="green-button">Vezi detalii</button>
-            </div>
-          </div>`;
-        container.appendChild(div);
-      });
-    }
+async function loadMatches(filters = {}) {
+  const query = Object.keys(filters)
+    .map(k => filters[k] ? `${k}=${encodeURIComponent(filters[k])}` : '')
+    .filter(Boolean).join('&');
 
-    async function loadSentRequests() {
-      try {
-        const res = await fetch('/api/sent-requests');
-        const requests = await res.json();
-        const list = document.getElementById('sentRequestsList');
-        list.innerHTML = '';
-        if (!requests.length) {
-          list.innerHTML = '<li>Nu ai trimis nicio cerere.</li>';
-          return;
-        }
-        requests.forEach(req => {
-          const color = req.status === 'acceptată' ? 'status-verde' :
-                        req.status === 'respinsă' ? 'status-rosu' : '';
-          const statusDisplay = req.status.charAt(0).toUpperCase() + req.status.slice(1);
-          const item = document.createElement('li');
-          item.innerHTML = `
-            <strong>Meci:</strong> ${req.match.location}, ${req.match.date} ${req.match.time}<br>
-            <strong>Suprafață:</strong> ${req.match.surface}<br>
-            <strong>Status:</strong> <span class="${color}">${statusDisplay}</span><br>
-            ${req.status === 'trimisă' ? `<button class="cancel-request-button" onclick="cancelRequest('${req._id}')">Anulează</button>` : ''}
-          `;
-          list.appendChild(item);
-        });
-      } catch {
-        document.getElementById('sentRequestsList').innerHTML = '<li>Eroare la încărcare cereri.</li>';
-      }
-    }
+  const res = await fetch(`/api/matches${query ? '?' + query : ''}`);
+  const matches = await res.json();
+  const container = document.getElementById('matchContainer');
+  container.innerHTML = '';
 
-    async function cancelRequest(id) {
-  if (!confirm('Ești sigur că vrei să anulezi această cerere?')) return;
+  if (!matches.length) return;
+
+  matches.forEach(match => {
+    const div = document.createElement('div');
+    div.className = 'match-item';
+    div.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <p><strong>Locație:</strong> ${match.location}</p>
+          <p><strong>Dată:</strong> ${match.date}</p>
+          <p><strong>Oră:</strong> ${match.time}</p>
+          <p><strong>Suprafață:</strong> ${match.surface}</p>
+        </div>
+        <div style="margin-left: 20px;">
+          <button onclick="window.location.href='match-details.html?id=${match._id}'" class="green-button">Vezi detalii</button>
+        </div>
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+async function loadSentRequests() {
   try {
-    const res = await fetch(`/api/cancel-request/${id}`, { method: 'DELETE' });
-    const data = await res.json();
-    alert(data.message);
+    const res = await fetch('/api/sent-requests');
+    const requests = await res.json();
+    const list = document.getElementById('sentRequestsList');
+    list.innerHTML = '';
 
-    
+    if (!requests.length) {
+      list.innerHTML = '<li>Nu ai trimis nicio cerere.</li>';
+      return;
+    }
+
+    requests.forEach(req => {
+      const color = req.status === 'acceptată' ? 'status-verde' :
+                    req.status === 'respinsă' ? 'status-rosu' : '';
+      const statusDisplay = req.status.charAt(0).toUpperCase() + req.status.slice(1);
+      const item = document.createElement('li');
+      item.innerHTML = `
+        <strong>Meci:</strong> ${req.match.location}, ${req.match.date} ${req.match.time}<br>
+        <strong>Suprafață:</strong> ${req.match.surface}<br>
+        <strong>Status:</strong> <span class="${color}">${statusDisplay}</span><br>
+        ${req.status === 'trimisă' ? `<button class="cancel-request-button" onclick="confirmCancel('${req._id}')">Anulează</button>` : ''}
+      `;
+      list.appendChild(item);
+    });
+  } catch {
+    document.getElementById('sentRequestsList').innerHTML = '<li>Eroare la încărcare cereri.</li>';
+  }
+}
+
+async function loadReceivedRequests() {
+  try {
+    const res = await fetch('/api/received-requests');
+    const requests = await res.json();
+    const container = document.getElementById('receivedRequestsContainer');
+    container.innerHTML = '';
+
+    if (!requests.length) {
+      container.innerHTML = '<p>Nu ai cereri primite.</p>';
+      return;
+    }
+
+    for (const req of requests) {
+      const div = document.createElement('div');
+      div.className = 'match-item';
+
+      const rating = await getUserRating(req.sender._id);
+      const stars = renderStars(rating);
+
+      let content = `
+        <p><strong>De la:</strong> ${req.sender.username} (${req.sender.email}) <span class="star-container">${stars}</span></p>
+        <p><strong>Nivel:</strong> ${req.sender.level} | <strong>Vârstă:</strong> ${req.sender.age}</p>
+        <p><strong>Localitate:</strong> ${req.sender.location} | <strong>Gen:</strong> ${req.sender.gender}</p>
+        <p><strong>Meci:</strong> ${req.match.location}, ${req.match.date} ${req.match.time}</p>`;
+
+      if (req.status === 'trimisă') {
+        content += `
+          <button class="green-button" onclick="handleRequest('${req._id}', 'acceptată')">Acceptă</button>
+          <button class="cancel-request-button" onclick="handleRequest('${req._id}', 'respinsă')">Respinge</button>`;
+      } else {
+        const cls = req.status === 'acceptată' ? 'status-verde' : 'status-rosu';
+        const txt = req.status.charAt(0).toUpperCase() + req.status.slice(1);
+        content += `<p><strong>Status:</strong> <span class="${cls}">${txt}</span></p>`;
+      }
+
+      div.innerHTML = content;
+      container.appendChild(div);
+    }
+  } catch {
+    document.getElementById('receivedRequestsContainer').innerHTML = '<p>Eroare la încărcare cereri.</p>';
+  }
+}
+
+async function handleRequest(id, status) {
+  try {
+    await fetch(`/api/update-request/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    });
+    loadReceivedRequests();
+    loadSentRequests();
+  } catch {
+    alert('Eroare la actualizare cerere.');
+  }
+}
+
+async function getUserRating(userId) {
+  try {
+    const res = await fetch(`/api/user-rating/${userId}`);
+    const data = await res.json();
+    return data.avgRating || 0;
+  } catch {
+    return 0;
+  }
+}
+
+function renderStars(rating) {
+  const rounded = Math.round(parseFloat(rating) * 2) / 2;
+  let stars = '';
+  for (let i = 1; i <= 5; i++) {
+    if (rounded >= i) {
+      stars += '<i class="fas fa-star"></i>';
+    } else if (rounded + 0.5 === i) {
+      stars += '<i class="fas fa-star-half-alt"></i>';
+    } else {
+      stars += '<i class="far fa-star"></i>';
+    }
+  }
+  return stars;
+}
+
+function openModal() {
+  document.getElementById('receivedModal').style.display = 'flex';
+  loadReceivedRequests();
+}
+
+function closeModal() {
+  document.getElementById('receivedModal').style.display = 'none';
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  getUserData();
+  loadMatches();
+  loadSentRequests();
+
+  document.getElementById('receivedRequestsBtn').addEventListener('click', openModal);
+
+  // Aplicare filtre
+  document.getElementById('filterForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const filters = {
+      location: document.getElementById('filterLocation').value,
+      date: document.getElementById('filterDate').value,
+      surface: document.getElementById('filterSurface').value
+    };
+    loadMatches(filters);
+  });
+
+  // Resetare filtre
+  document.getElementById('resetFilters').addEventListener('click', () => {
+    document.getElementById('filterLocation').value = '';
+    document.getElementById('filterDate').value = '';
+    document.getElementById('filterSurface').value = '';
+    loadMatches(); // Reîncarcă toate meciurile
+  });
+});
+
+
+// ✅ Noua funcționalitate pentru confirmare anulare cerere
+let cancelRequestId = null;
+
+function confirmCancel(id) {
+  cancelRequestId = id;
+  document.getElementById('confirmCancelModal').style.display = 'flex';
+}
+
+document.getElementById('confirmYes').addEventListener('click', async () => {
+  if (!cancelRequestId) return;
+
+  try {
+    await fetch(`/api/cancel-request/${cancelRequestId}`, { method: 'DELETE' });
     loadSentRequests();
     loadReceivedRequests();
   } catch {
     alert('A apărut o eroare.');
   }
-}
 
+  document.getElementById('confirmCancelModal').style.display = 'none';
+  cancelRequestId = null;
+});
 
-    function openModal() {
-      document.getElementById('receivedModal').style.display = 'flex';
-      loadReceivedRequests();
-    }
-
-    function closeModal() {
-      document.getElementById('receivedModal').style.display = 'none';
-    }
-
-    async function loadReceivedRequests() {
-      try {
-        const res = await fetch('/api/received-requests');
-        const requests = await res.json();
-        const container = document.getElementById('receivedRequestsContainer');
-        container.innerHTML = '';
-        if (!requests.length) {
-          container.innerHTML = '<p>Nu ai cereri primite.</p>';
-          return;
-        }
-
-        requests.forEach(req => {
-          const div = document.createElement('div');
-          div.className = 'match-item';
-          let content = `
-            <p><strong>De la:</strong> ${req.sender.username} (${req.sender.email})</p>
-            <p><strong>Nivel:</strong> ${req.sender.level} | <strong>Vârstă:</strong> ${req.sender.age}</p>
-            <p><strong>Localitate:</strong> ${req.sender.location} | <strong>Gen:</strong> ${req.sender.gender}</p>
-            <p><strong>Meci:</strong> ${req.match.location}, ${req.match.date} ${req.match.time}</p>
-          `;
-
-          if (req.status === 'trimisă') {
-            content += `
-              <button class="green-button" onclick="handleRequest('${req._id}', 'acceptată')">Acceptă</button>
-              <button class="cancel-request-button" onclick="handleRequest('${req._id}', 'respinsă')">Respinge</button>`;
-          } else {
-            const cls = req.status === 'acceptată' ? 'status-verde' : 'status-rosu';
-            const txt = req.status.charAt(0).toUpperCase() + req.status.slice(1);
-            content += `<p><strong>Status:</strong> <span class="${cls}">${txt}</span></p>`;
-          }
-
-          div.innerHTML = content;
-          container.appendChild(div);
-        });
-      } catch {
-        document.getElementById('receivedRequestsContainer').innerHTML = '<p>Eroare la încărcare cereri.</p>';
-      }
-    }
-
-    async function handleRequest(id, status) {
-      try {
-        const res = await fetch(`/api/update-request/${id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status })
-        });
-        const data = await res.json();
-        alert(data.message);
-        loadReceivedRequests();
-        loadSentRequests();
-      } catch {
-        alert('Eroare la actualizare cerere.');
-      }
-    }
+document.getElementById('confirmNo').addEventListener('click', () => {
+  document.getElementById('confirmCancelModal').style.display = 'none';
+  cancelRequestId = null;
+});
   </script>
 </body>
 </html>
