@@ -12,7 +12,7 @@ const isAuthenticated = require('./middleware/isAuthenticated');
 
 const app = express();
 
-// ======= Middlewares =======
+
 app.use(express.static('public'));
 app.use(express.json());
 
@@ -20,10 +20,10 @@ app.use(session({
   secret: 'tenisync_secret',
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: false } // setează true dacă folosești HTTPS
+  cookie: { secure: false } 
 }));
 
-// ======= Conectare MongoDB =======
+
 mongoose.connect('mongodb+srv://pauldarau2:Adrian2002@cluster0.odn8gc5.mongodb.net/tennisapp?retryWrites=true&w=majority&appName=Cluster0', {
   useNewUrlParser: true,
   useUnifiedTopology: true
@@ -31,18 +31,27 @@ mongoose.connect('mongodb+srv://pauldarau2:Adrian2002@cluster0.odn8gc5.mongodb.n
 .then(() => console.log('Conectat la MongoDB!'))
 .catch(err => console.error('Eroare la conectare MongoDB:', err));
 
-// ======= Rute API =======
+
 app.use('/api', authRoutes);
 app.use('/api', matchRoutes);
 app.use('/api', requestRoutes);
-app.use('/api', userRoutes); // ruta pentru rating mediu
+app.use('/api', userRoutes); 
 
-// ======= Servire fișiere HTML =======
+
 app.use(express.static('views'));
 
 app.get('/', (req, res) => {
   res.send('Salut din TeniSync 🎾!');
 });
+
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'views', 'login.html'));
+});
+
+app.get('/register', (req, res) => {
+  res.sendFile(path.join(__dirname, 'views', 'register.html'));
+});
+
 
 app.get('/dashboard', isAuthenticated, (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'dashboard.html'));
@@ -56,8 +65,9 @@ app.get('/my-matches', isAuthenticated, (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'my-matches.html'));
 });
 
-// ======= Pornire Server =======
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Serverul rulează pe http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Serverul rulează pe toate interfețele la portul ${PORT}`);
 });
+

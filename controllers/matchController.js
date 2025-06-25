@@ -169,6 +169,10 @@ const finalizeMatch = async (req, res) => {
     const userId = req.session.user.id;
     const { score, rating } = req.body;
 
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ message: 'Ratingul este obligatoriu și trebuie să fie între 1 și 5.' });
+    }
+
     const match = await Match.findById(matchId);
     if (!match) return res.status(404).json({ message: 'Meciul nu a fost găsit' });
 
@@ -187,6 +191,7 @@ const finalizeMatch = async (req, res) => {
     res.status(500).json({ message: 'Eroare la finalizarea meciului' });
   }
 };
+
 
 module.exports = {
   createMatch,

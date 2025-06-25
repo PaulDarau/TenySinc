@@ -195,6 +195,9 @@
 
   <!-- Notificare succes -->
   <div id="successNotif" class="notification">✅ Meci finalizat cu succes!</div>
+  <!-- Notificare eroare -->
+<div id="errorNotif" class="notification" style="background-color: #dc3545;">⚠️ Trebuie să acorzi un rating adversarului!</div>
+
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -362,16 +365,35 @@
       const ratingEl = document.querySelector(`.star-rating[data-matchid="${matchId}"]`);
       ratingToFinalize = +ratingEl?.dataset.selected || 0;
 
+      // ✅ Validare: să nu finalizezi dacă ratingul este 0
+    if (!ratingToFinalize) {
+  showErrorNotif("⚠️ Trebuie să acorzi un rating adversarului înainte de finalizare.");
+  return;
+}
+
       document.getElementById('confirmFinalizeModal').style.display = 'flex';
     }
+
 
     document.getElementById('confirmFinalizeYes').addEventListener('click', async () => {
       try {
         const res = await fetch('/api/finalize-match/' + matchToFinalizeId, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ score: scoreToFinalize, rating: ratingToFinalize })
-        });
+  method: 'PATCH',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ score: scoreToFinalize, rating: ratingToFinalize })
+});
+
+const data = await res.json();
+
+document.getElementById('confirmFinalizeModal').style.display = 'none';
+
+if (res.ok) {
+  showSuccessNotif();
+  loadMyMatches();
+} else {
+  alert(data.message || 'Eroare la finalizarea meciului.');
+}
+
 
         document.getElementById('confirmFinalizeModal').style.display = 'none';
         showSuccessNotif();
@@ -392,6 +414,15 @@
         notif.classList.remove('show');
       }, 2500);
     }
+    function showErrorNotif(message) {
+  const notif = document.getElementById('errorNotif');
+  notif.textContent = message;
+  notif.classList.add('show');
+  setTimeout(() => {
+    notif.classList.remove('show');
+  }, 2500);
+}
+
   </script>
 </body>
 </html>
