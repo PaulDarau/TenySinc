@@ -289,7 +289,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById('receivedRequestsBtn').addEventListener('click', openModal);
 
-  // Aplicare filtre
+  
   document.getElementById('filterForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const filters = {
@@ -300,17 +300,17 @@ document.addEventListener("DOMContentLoaded", () => {
     loadMatches(filters);
   });
 
-  // Resetare filtre
+  
   document.getElementById('resetFilters').addEventListener('click', () => {
     document.getElementById('filterLocation').value = '';
     document.getElementById('filterDate').value = '';
     document.getElementById('filterSurface').value = '';
-    loadMatches(); // Reîncarcă toate meciurile
+    loadMatches(); 
   });
 });
 
 
-// ✅ Noua funcționalitate pentru confirmare anulare cerere
+
 let cancelRequestId = null;
 
 function confirmCancel(id) {

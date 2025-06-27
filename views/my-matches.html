@@ -182,7 +182,7 @@
     </div>
   </main>
 
-  <!-- Modal confirmare finalizare -->
+
   <div id="confirmFinalizeModal" class="modal">
     <div class="modal-content">
       <p>Ești sigur că vrei să finalizezi acest meci?</p>
@@ -193,9 +193,9 @@
     </div>
   </div>
 
-  <!-- Notificare succes -->
+ 
   <div id="successNotif" class="notification">✅ Meci finalizat cu succes!</div>
-  <!-- Notificare eroare -->
+  
 <div id="errorNotif" class="notification" style="background-color: #dc3545;">⚠️ Trebuie să acorzi un rating adversarului!</div>
 
 
@@ -365,7 +365,7 @@
       const ratingEl = document.querySelector(`.star-rating[data-matchid="${matchId}"]`);
       ratingToFinalize = +ratingEl?.dataset.selected || 0;
 
-      // ✅ Validare: să nu finalizezi dacă ratingul este 0
+     
     if (!ratingToFinalize) {
   showErrorNotif("⚠️ Trebuie să acorzi un rating adversarului înainte de finalizare.");
   return;

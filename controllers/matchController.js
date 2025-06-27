@@ -2,7 +2,6 @@ const Match = require('../models/Match');
 const Request = require('../models/Request');
 const User = require('../models/User');
 
-// ✅ Creare meci
 const createMatch = async (req, res) => {
   try {
     const { location, date, time, surface } = req.body;
@@ -24,7 +23,7 @@ const createMatch = async (req, res) => {
   }
 };
 
-// ✅ Obține toate meciurile disponibile
+
 const getAllMatches = async (req, res) => {
   try {
     const { location, date, surface } = req.query;
@@ -49,7 +48,7 @@ const getAllMatches = async (req, res) => {
   }
 };
 
-// ✅ Detalii meci
+
 const getMatchById = async (req, res) => {
   try {
     const match = await Match.findById(req.params.id)
@@ -66,7 +65,7 @@ const getMatchById = async (req, res) => {
   }
 };
 
-// ✅ Trimite cerere
+
 const sendRequest = async (req, res) => {
   try {
     const matchId = req.params.matchId;
@@ -87,9 +86,7 @@ const sendRequest = async (req, res) => {
   }
 };
 
-// ✅ Obține meciurile utilizatorului (acceptate și finalizate)
-// ✅ Obține meciurile utilizatorului (acceptate și finalizate)
-// ✅ Obține meciurile utilizatorului (acceptate și finalizate)
+
 const getUserMatches = async (req, res) => {
   try {
     const userId = req.session.user.id;
@@ -99,19 +96,19 @@ const getUserMatches = async (req, res) => {
       return res.status(404).json({ message: 'Utilizatorul nu a fost găsit' });
     }
 
-    // Cereri trimise de utilizatorul logat
+    
     const requests = await Request.find({ sender: userId, status: 'acceptată' }).populate({
       path: 'match',
       populate: { path: 'creator', select: 'username email' }
     });
 
-    // Meciuri create de utilizatorul logat
+    
     const createdMatches = await Match.find({ creator: userId }).populate('creator', 'username email');
 
     const accepted = [];
     const finalized = [];
 
-    // Meciuri unde utilizatorul NU e creatorul (a trimis cerere)
+    
     for (const req of requests) {
       if (!req.match || !req.match.creator) continue;
       const match = req.match;
@@ -120,7 +117,7 @@ const getUserMatches = async (req, res) => {
       const matchData = {
         ...match._doc,
         creator: creator,
-        opponent: currentUser, // userul logat este oponentul creatorului aici
+        opponent: currentUser, 
         user: currentUser
       };
 
@@ -131,7 +128,7 @@ const getUserMatches = async (req, res) => {
       }
     }
 
-    // Meciuri create de utilizatorul logat
+    
     for (const match of createdMatches) {
       const acceptedRequest = await Request.findOne({ match: match._id, status: 'acceptată' })
         .populate('sender', 'username email');
@@ -162,7 +159,7 @@ const getUserMatches = async (req, res) => {
 
 
 
-// ✅ Finalizează un meci
+
 const finalizeMatch = async (req, res) => {
   try {
     const matchId = req.params.id;

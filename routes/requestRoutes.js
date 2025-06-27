@@ -1,24 +1,24 @@
-// routes/requestRoutes.js
+
 const express = require('express');
 const router = express.Router();
 const requestController = require('../controllers/requestController');
 const isAuthenticated = require('../middleware/isAuthenticated');
-const Request = require('../models/Request'); // 🆕 Adaugă asta la început
+const Request = require('../models/Request'); 
 
 
-// ✅ Trimite cerere
+
 router.post('/send-request', isAuthenticated, requestController.sendRequest);
 
-// ✅ Cereri trimise
+
 router.get('/sent-requests', isAuthenticated, requestController.getSentRequests);
 
-// ✅ Cereri primite
+
 router.get('/received-requests', isAuthenticated, requestController.getReceivedRequests);
 
-// ✅ Actualizare status (acceptare / respingere)
+
 router.patch('/update-request/:id', isAuthenticated, requestController.updateRequestStatus);
 
-// ✅ Anulare cerere
+
 router.delete('/cancel-request/:id', isAuthenticated, async (req, res) => {
   try {
     const requestId = req.params.id;

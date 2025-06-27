@@ -1,7 +1,7 @@
 const Request = require('../models/Request');
 const Match = require('../models/Match');
 
-// ✅ Trimitere cerere
+
 exports.sendRequest = async (req, res) => {
   try {
     const { matchId } = req.body;
@@ -29,7 +29,7 @@ exports.sendRequest = async (req, res) => {
   }
 };
 
-// ✅ Cereri trimise (exclude meciuri finalizate)
+
 exports.getSentRequests = async (req, res) => {
   try {
     const requests = await Request.find({ sender: req.session.user.id })
@@ -44,7 +44,7 @@ exports.getSentRequests = async (req, res) => {
   }
 };
 
-// ✅ Cereri primite (doar cereri TRIMISE, pentru meciuri nefinalizate și fără cerere acceptată deja)
+
 exports.getReceivedRequests = async (req, res) => {
   try {
     const userId = req.session.user.id;
@@ -74,7 +74,7 @@ exports.getReceivedRequests = async (req, res) => {
   }
 };
 
-// ✅ Actualizare status cerere
+
 exports.updateRequestStatus = async (req, res) => {
   try {
     const requestId = req.params.id;
@@ -108,7 +108,7 @@ exports.updateRequestStatus = async (req, res) => {
   }
 };
 
-// ✅ Anulare cerere
+
 exports.cancelRequest = async (req, res) => {
   try {
     const requestId = req.params.id;

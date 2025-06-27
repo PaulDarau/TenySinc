@@ -1,4 +1,4 @@
-/* Fundal login */
+
 body.auth-body {
   background-image: url('/images/neon-tennis.jpg');
   background-size: cover;
@@ -13,7 +13,6 @@ body.auth-body {
   overflow: hidden;
 }
 
-/* Fundal register */
 body.auth-body-register {
   background-image: url('/images/yellow-green.jpg');
   background-size: cover;
@@ -96,7 +95,7 @@ body.auth-body-register {
   text-decoration: underline;
 }
 
-/* === DASHBOARD === */
+
 .dashboard-body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
@@ -197,7 +196,7 @@ body.auth-body-register {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* Match card */
+
 .match-item {
   background: white;
   padding: 1rem;
@@ -229,7 +228,7 @@ body.auth-body-register {
   background-color: #146c43;
 }
 
-/* Buton verde general */
+
 .green-button {
   background-color: #198754;
   color: white;
@@ -245,14 +244,14 @@ body.auth-body-register {
   background-color: #146c43;
 }
 
-/* === Dreapta dashboard === */
+
 .right-side {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
-/* Profil + cereri - lățime egală */
+
 .profile-card,
 .requests-card {
   flex: 0 0 250px;
@@ -325,7 +324,7 @@ body.auth-body-register {
 .cancel-request-button:hover {
   background-color: #a93226;
 }
-/* Modal Cereri Primite */
+
 .modal {
   display: none;
   position: fixed;
@@ -374,7 +373,7 @@ body.auth-body-register {
   max-width: 90%;
   box-shadow: 0 0 15px rgba(0,0,0,0.3);
   position: relative;
-  max-height: 80vh; /* adăugat */
+  max-height: 80vh; 
   display: flex;
   flex-direction: column;
 }
@@ -382,7 +381,7 @@ body.auth-body-register {
 #receivedRequestsContainer {
   overflow-y: auto;
   margin-top: 1rem;
-  max-height: 60vh; /* scroll în interiorul conținutului */
+  max-height: 60vh; 
 }
 .my-matches-body {
   background-color: #c0e8b8;
@@ -478,7 +477,7 @@ body.auth-body-register {
   text-align: center;
   margin-top: 10px;
 }
-/* Modal confirmare anulare cerere */
+
 #confirmCancelModal {
   display: none;
   position: fixed;

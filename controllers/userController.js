@@ -1,8 +1,8 @@
-// controllers/userController.js
+
 const Match = require('../models/Match');
 const User = require('../models/User');
 
-// ✅ Returnează media ratingurilor primite de un utilizator
+
 const getAverageRating = async (req, res) => {
   try {
     const userId = req.params.id;
